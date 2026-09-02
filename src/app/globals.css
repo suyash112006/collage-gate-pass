@@ -1,0 +1,166 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-primary: #1D4ED8;
+  --color-primary-dark: #1E3A8A;
+  --color-tg-primary: #16A34A;
+  --color-tg-primary-dark: #15803D;
+  --color-background: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-input: #FFFFFF;
+  --color-text: #0F172A;
+  --color-secondary: #64748B;
+  --color-muted: #94A3B8;
+  --color-border: #E2E8F0;
+  
+  --color-approved: #16A34A;
+  --color-pending: #D97706;
+  --color-declined: #DC2626;
+
+  --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Portal-scoped color overrides — set by DashboardLayout */
+.portal-student {
+  --color-portal: #1D4ED8;
+  --color-portal-dark: #1E3A8A;
+  --color-portal-light: #EFF6FF;
+  --color-portal-ring: #93C5FD;
+}
+
+.portal-tg {
+  --color-portal: #2563EB;
+  --color-portal-dark: #1D4ED8;
+  --color-portal-light: #EFF6FF;
+  --color-portal-ring: #DBEAFE;
+}
+
+/* Dark Mode Theme Custom Variables Overrides - Warm Black / Soft Charcoal */
+.dark {
+  --color-background: #171717;
+  --color-surface: #242424;
+  --color-surface-hover: #303030;
+  --color-surface-elevated: #2D2D2D;
+  --color-input: #1F1F1F;
+  --color-border: #3A3A3A;
+  --color-text: #F5F5F5;
+  --color-secondary: #B8B8B8;
+  --color-muted: #8A8A8A;
+  
+  --color-approved: #22C55E;
+  --color-pending: #F59E0B;
+  --color-declined: #EF4444;
+
+  --color-portal: #2563EB;
+  --color-portal-dark: #1D4ED8;
+  --color-portal-light: rgba(37, 99, 235, 0.14);
+  --color-portal-ring: rgba(59, 130, 246, 0.30);
+
+  color-scheme: dark;
+}
+
+.dark .portal-student,
+.dark .portal-tg {
+  --color-portal: #2563EB;
+  --color-portal-dark: #1D4ED8;
+  --color-portal-light: rgba(37, 99, 235, 0.14);
+  --color-portal-ring: rgba(59, 130, 246, 0.30);
+}
+
+/* Sidebar */
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-secondary);
+  transition: all 150ms ease;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--color-portal-light);
+  color: var(--color-portal);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--color-portal-light);
+  color: var(--color-portal);
+  font-weight: 600;
+}
+
+/* Mobile bottom navigation */
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  padding: 0.375rem 0;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--color-secondary);
+  transition: color 150ms ease;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-nav-item.active {
+  color: var(--color-portal);
+  font-weight: 600;
+}
+
+/* Mobile drawer overlay */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 40;
+  animation: fadeIn 200ms ease;
+}
+
+.drawer-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  max-width: 80vw;
+  background: var(--color-surface);
+  z-index: 50;
+  animation: slideIn 200ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Safe area for mobile bottom nav */
+.main-content-with-mobile-nav {
+  padding-bottom: 4.5rem;
+}
+
+@media (min-width: 1024px) {
+  .main-content-with-mobile-nav {
+    padding-bottom: 0;
+  }
+}
