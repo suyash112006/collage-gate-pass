@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient, getAuthUser } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function createGatePass(formData: FormData) {
   const reason = formData.get('reason') as string
@@ -465,7 +466,7 @@ export async function reviewGatePass(passId: string, status: 'approved' | 'decli
 
   const sanitizedRemark = status === 'declined' && remark && remark.trim().length > 0 ? remark.trim() : null
 
-  // Atomic Update: Enforces that exactly this TG owns it and it is still pending.
+  // Atomic Update: Enforces that exactly this TG owns it.
   const { data: updateData, error: updateError } = await supabase
     .from('gate_passes')
     .update({ 
@@ -474,7 +475,6 @@ export async function reviewGatePass(passId: string, status: 'approved' | 'decli
     })
     .eq('id', passId)
     .eq('tg_id', tgData.id)
-    .eq('status', 'pending')
     .select('id')
 
   if (updateError) {
@@ -487,20 +487,52 @@ export async function reviewGatePass(passId: string, status: 'approved' | 'decli
     return { error: 'This gate pass has already been reviewed or is not assigned to you.' }
   }
 
+  // INSERT NOTIFICATION (Server-side)
+  const { data: passData, error: passError } = await supabase.from('gate_passes').select('student_id').eq('id', passId).single()
+  
+  if (passError || !passData?.student_id) {
+    console.error('Failed to find student for gate pass:', passError)
+    return { error: 'An unexpected error occurred while retrieving student information for the notification.' }
+  }
+  
+  const { data: actualStudent, error: studentUserError } = await supabase.from('students').select('user_id').eq('id', passData.student_id).single()
+  
+  if (studentUserError || !actualStudent?.user_id) {
+    console.error('Failed to find user ID for student:', studentUserError)
+    return { error: 'An unexpected error occurred while locating the student user account.' }
+  }
+
+  const notificationTitle = status === 'approved' ? 'Gate Pass Approved' : 'Gate Pass Declined'
+  let notificationMessage = status === 'approved' 
+    ? 'Your gate pass request has been approved.' 
+    : 'Your gate pass request was declined.'
+    
+  if (status === 'declined' && sanitizedRemark) {
+    notificationMessage += ` Remark: ${sanitizedRemark}`
+  }
+
+  const adminClient = createAdminClient()
+  const { error: notifError } = await adminClient.from('notifications').insert({
+    user_id: actualStudent.user_id,
+    gate_pass_id: passId,
+    type: status,
+    title: notificationTitle,
+    message: notificationMessage
+  })
+
+  if (notifError) {
+    console.error('Failed to insert notification:', notifError)
+    return { error: 'Failed to create notification. Please contact administration.' }
+  }
+
   // Phase 6B: Trigger Web Push for the Student post-transaction
   try {
     const { sendPushNotificationToUser } = await import('@/lib/push/send-push')
-    const { data: passData } = await supabase.from('gate_passes').select('student_id').eq('id', passId).single()
-    if (passData?.student_id) {
-      const { data: actualStudent } = await supabase.from('students').select('user_id').eq('id', passData.student_id).single()
-      if (actualStudent?.user_id) {
-        await sendPushNotificationToUser(actualStudent.user_id, {
-          title: `Gate Pass ${status === 'approved' ? 'Approved' : 'Declined'}`,
-          body: status === 'approved' ? 'Your gate pass request has been approved.' : 'Your gate pass request was declined.',
-          url: '/student/notifications'
-        })
-      }
-    }
+    await sendPushNotificationToUser(actualStudent.user_id, {
+      title: notificationTitle,
+      body: notificationMessage,
+      url: '/student/notifications'
+    })
   } catch (err) {
     console.error('Failed to send push notification:', err)
   }

@@ -85,11 +85,12 @@ export async function studentSignUp(formData: FormData) {
   const department = formData.get('department') as string
   const year = formData.get('year') as string
   const division = formData.get('division') as string
+  const tgId = formData.get('tgId') as string
   
-  console.log('[AUTH_TRACE] studentSignUp attempt:', { rawEmail: emailInput, studentId })
+  console.log('[AUTH_TRACE] studentSignUp attempt:', { rawEmail: emailInput, studentId, tgId })
 
-  if (!emailInput || !password || !fullName || !studentId || !rollNo || !department || !year || !division) {
-    return { error: 'Missing required fields' }
+  if (!emailInput || !password || !fullName || !studentId || !rollNo || !department || !year || !division || !tgId) {
+    return { error: 'Missing required fields, including Teacher Guardian selection' }
   }
   
   const email = emailInput.trim().toLowerCase()
@@ -140,14 +141,16 @@ export async function studentSignUp(formData: FormData) {
 
   console.log('[AUTH_TRACE] Inserting students record for user:', authData.user.id)
   // 3. Insert into students table
-  const { error: studentError } = await adminClient.from('students').insert({
+  // status defaults to 'UNDER_REVIEW' as per DB schema
+  const { data: studentData, error: studentError } = await adminClient.from('students').insert({
     user_id: authData.user.id,
     student_id: studentId,
     roll_no: rollNo,
     department: department,
     year: year,
-    division: division
-  })
+    division: division,
+    tg_id: tgId
+  }).select().single()
 
   if (studentError) {
     console.error('[AUTH_TRACE] Student insertion error:', studentError)
@@ -155,6 +158,41 @@ export async function studentSignUp(formData: FormData) {
       return { error: 'A student with this Student ID already exists.' }
     }
     return { error: 'Failed to complete student registration. Please contact support.' }
+  }
+
+  // 4. Create Notifications
+  try {
+    // Notify TG
+    const { data: tgRecord } = await adminClient.from('tgs').select('user_id').eq('id', tgId).single();
+    if (tgRecord && studentData) {
+      await adminClient.from('notifications').insert({
+        user_id: tgRecord.user_id,
+        student_id: studentData.id,
+        type: 'new_student_request',
+        title: 'New Student Request',
+        message: `${fullName} has requested to join your students.`
+      });
+    }
+
+    // Notify Student
+    if (studentData) {
+      await adminClient.from('notifications').insert({
+        user_id: authData.user.id,
+        student_id: studentData.id,
+        type: 'account_under_review',
+        title: 'Account Under Review',
+        message: 'Your account has been submitted to your Teacher Guardian for approval.'
+      });
+    }
+  } catch (notifErr) {
+    console.error('[AUTH_TRACE] Failed to insert notifications:', notifErr);
+    // don't fail the signup if notifications fail
+  }
+
+  // 5. Explicitly sign out the user so they are forced to log in manually and face the UNDER_REVIEW block
+  if (authData?.user) {
+    console.log('[AUTH_TRACE] Signing out newly created user to enforce manual login.');
+    await supabase.auth.signOut();
   }
 
   console.log('[AUTH_TRACE] Student signup fully successful.')
@@ -236,6 +274,29 @@ export async function tgSignUp(formData: FormData) {
     return { error: 'Failed to complete TG registration. Please contact support.' }
   }
 
+  if (authData?.user) {
+    await supabase.auth.signOut()
+  }
+
   console.log('[AUTH_TRACE] TG signup fully successful.')
   return { success: true }
+}
+
+export async function fetchAvailableTGs() {
+  const adminClient = createAdminClient()
+  
+  // Use admin client since this is an unauthenticated server action, 
+  // or we could use regular client if we rely on the RLS view.
+  // Using the view `available_tgs` we created in the migration.
+  const { data, error } = await adminClient
+    .from('available_tgs')
+    .select('tg_id, full_name, department')
+    .order('full_name')
+
+  if (error) {
+    console.error('[AUTH_TRACE] Error fetching available TGs:', error)
+    return { error: 'Failed to load Teacher Guardians' }
+  }
+
+  return { data }
 }

@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useEffect } from "react"
 import Link from "next/link"
-import { Bell, ChevronDown, User, LogOut, Settings } from "lucide-react"
+import { ChevronDown, User, LogOut, Settings } from "lucide-react"
 import { Avatar } from "@/components/ui/avatar"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 
 interface DesktopHeaderProps {
   userRole: "STUDENT" | "TG"
@@ -17,7 +18,6 @@ export function DesktopHeader({ userRole, unreadCount, userName, onLogout }: Des
   const dropdownRef = useRef<HTMLDivElement>(null)
   
   const roleLabel = userRole === "STUDENT" ? "Student" : "Teacher Guardian"
-  const notificationHref = userRole === "STUDENT" ? "/student/notifications" : "/tg/notifications"
   const profileHref = userRole === "STUDENT" ? "/student/profile" : "/tg/profile"
   const settingsHref = userRole === "STUDENT" ? "/student/settings" : "/tg/settings"
 
@@ -35,17 +35,7 @@ export function DesktopHeader({ userRole, unreadCount, userName, onLogout }: Des
     <header className="hidden lg:flex fixed top-0 right-0 left-60 h-[5.5rem] bg-[var(--color-surface)] border-b border-[var(--color-border)] z-20 items-center justify-end px-8">
       <div className="flex items-center gap-6">
         {/* Notification Bell */}
-        <Link 
-          href={notificationHref}
-          className="relative flex items-center justify-center w-10 h-10 rounded-full border border-[var(--color-border)] text-[var(--color-secondary)] hover:bg-[var(--color-background)] hover:text-[var(--color-text)] transition-colors"
-        >
-          <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          )}
-        </Link>
+        <NotificationBell initialUnreadCount={unreadCount} />
 
         {/* Vertical Divider */}
         <div className="h-8 w-px bg-[var(--color-border)]"></div>

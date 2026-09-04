@@ -9,6 +9,7 @@ import {
   FileText,
   Bell,
   User,
+  Users,
   Settings,
   LogOut,
   ClipboardList,
@@ -36,6 +37,7 @@ const studentNavItems = [
 
 const tgNavItems = [
   { label: "Dashboard", href: "/tg/dashboard", icon: LayoutDashboard },
+  { label: "Student Management", href: "/tg/students", icon: Users },
   { label: "Requests", href: "/tg/requests", icon: ClipboardList },
 
   { label: "Access", href: "/tg/access", icon: QrCode },

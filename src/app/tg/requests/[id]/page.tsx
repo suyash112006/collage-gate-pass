@@ -227,28 +227,7 @@ export default async function TgRequestDetailPage({ params }: { params: Promise<
               </div>
             )}
 
-            {req.status === 'pending' ? (
-              <ReviewControls passId={req.id} />
-            ) : (
-              <div className="flex items-center gap-2 p-4 rounded-xl bg-[var(--color-background)] border border-[var(--color-border)]">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{
-                  backgroundColor: req.status === 'approved' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                  color: req.status === 'approved' ? '#22C55E' : '#EF4444'
-                }}>
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-[var(--color-text)]">
-                    This request was <span className="font-bold capitalize" style={{
-                      color: req.status === 'approved' ? '#22C55E' : '#EF4444'
-                    }}>{req.status}</span>.
-                  </p>
-                  <p className="text-xs text-[var(--color-secondary)] mt-0.5">
-                    No further actions can be taken.
-                  </p>
-                </div>
-              </div>
-            )}
+            <ReviewControls passId={req.id} initialStatus={req.status} />
           </CardContent>
         </Card>
       </div>

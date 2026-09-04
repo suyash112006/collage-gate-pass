@@ -51,6 +51,9 @@ export async function updateSession(request: NextRequest) {
 
   if (isStudentRoute || isTgRoute) {
     if (!user) {
+      if (pathname === '/student/blocked') {
+        return supabaseResponse
+      }
       const url = request.nextUrl.clone()
       url.pathname = isStudentRoute ? '/student/login' : '/tg/login'
       return NextResponse.redirect(url)
@@ -71,6 +74,41 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
+    if (isStudentRoute && role === 'student') {
+      // Check student status
+      const { data: student } = await supabase
+        .from('students')
+        .select('status')
+        .eq('user_id', user.id)
+        .single()
+
+      const status = student?.status || 'UNDER_REVIEW'
+      
+      const isStatusRoute = 
+        pathname === '/student/under-review' || 
+        pathname === '/student/blocked' || 
+        pathname === '/student/declined'
+
+      if (status === 'UNDER_REVIEW' && pathname !== '/student/under-review') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/student/under-review'
+        return NextResponse.redirect(url)
+      } else if (status === 'BLOCKED' && pathname !== '/student/blocked') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/student/blocked'
+        return NextResponse.redirect(url)
+      } else if (status === 'DECLINED' && pathname !== '/student/declined') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/student/declined'
+        return NextResponse.redirect(url)
+      } else if (status === 'APPROVED' && isStatusRoute) {
+        // Redirect active students away from status pages back to dashboard
+        const url = request.nextUrl.clone()
+        url.pathname = '/student/dashboard'
+        return NextResponse.redirect(url)
+      }
+    }
+
     if (isTgRoute && role !== 'tg') {
       const url = request.nextUrl.clone()
       url.pathname = role === 'student' ? '/student/dashboard' : '/tg/login'
@@ -87,7 +125,24 @@ export async function updateSession(request: NextRequest) {
       .single()
       
     const url = request.nextUrl.clone()
-    url.pathname = profile?.role === 'tg' ? '/tg/dashboard' : '/student/dashboard'
+    
+    if (profile?.role === 'tg') {
+      url.pathname = '/tg/dashboard'
+    } else {
+      // For students, check status before redirecting
+      const { data: student } = await supabase
+        .from('students')
+        .select('status')
+        .eq('user_id', user.id)
+        .single()
+        
+      const status = student?.status || 'UNDER_REVIEW'
+      if (status === 'UNDER_REVIEW') url.pathname = '/student/under-review'
+      else if (status === 'BLOCKED') url.pathname = '/student/blocked'
+      else if (status === 'DECLINED') url.pathname = '/student/declined'
+      else url.pathname = '/student/dashboard'
+    }
+    
     return NextResponse.redirect(url)
   }
 

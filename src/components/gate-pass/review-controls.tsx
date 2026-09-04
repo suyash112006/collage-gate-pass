@@ -5,15 +5,19 @@ import { reviewGatePass } from "@/app/actions/gate-pass"
 import { useRouter } from "next/navigation"
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react"
 
-export function ReviewControls({ passId }: { passId: string }) {
+export function ReviewControls({ passId, initialStatus }: { passId: string, initialStatus: string }) {
   const router = useRouter()
+  const [optimisticStatus, setOptimisticStatus] = useState<string | null>(null)
+  const currentStatus = optimisticStatus || initialStatus
   const [isPending, startTransition] = useTransition()
   const [isDeclining, setIsDeclining] = useState(false)
   const [remark, setRemark] = useState("")
   const [error, setError] = useState<string | null>(null)
 
+
   const handleApprove = () => {
-    if (!window.confirm("Are you sure you want to approve this gate pass?")) return
+    // If pending, use confirm. If declined, no confirm needed (as it is a direct action to approve)
+    if (currentStatus === 'pending' && !window.confirm("Are you sure you want to approve this gate pass?")) return
 
     setError(null)
     startTransition(async () => {
@@ -21,6 +25,7 @@ export function ReviewControls({ passId }: { passId: string }) {
       if (result.error) {
         setError(result.error)
       } else {
+        setOptimisticStatus("approved")
         router.refresh()
       }
     })
@@ -40,6 +45,9 @@ export function ReviewControls({ passId }: { passId: string }) {
       if (result.error) {
         setError(result.error)
       } else {
+        setOptimisticStatus("declined")
+        setIsDeclining(false)
+        setRemark("")
         router.refresh()
       }
     })
@@ -53,6 +61,24 @@ export function ReviewControls({ passId }: { passId: string }) {
           <div>
             <p className="text-sm font-semibold text-red-800 dark:text-red-400">Action Failed</p>
             <p className="text-xs text-red-700 dark:text-red-300 mt-0.5">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {currentStatus !== 'pending' && (
+        <div className="flex items-center gap-2 p-4 rounded-xl bg-[var(--color-background)] border border-[var(--color-border)] mb-4">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{
+            backgroundColor: currentStatus === 'approved' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            color: currentStatus === 'approved' ? '#22C55E' : '#EF4444'
+          }}>
+            {currentStatus === 'approved' ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-[var(--color-text)]">
+              This request was <span className="font-bold capitalize" style={{
+                color: currentStatus === 'approved' ? '#22C55E' : '#EF4444'
+              }}>{currentStatus}</span>.
+            </p>
           </div>
         </div>
       )}
@@ -84,39 +110,41 @@ export function ReviewControls({ passId }: { passId: string }) {
               setError(null)
             }}
             disabled={isPending}
-            className="inline-flex justify-center items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-background)] focus:outline-none focus:ring-2 focus:ring-[var(--color-portal)] focus:ring-offset-2 focus:ring-offset-[var(--color-background)] transition-colors disabled:opacity-50"
+            className="inline-flex justify-center items-center rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-5 py-2.5 text-sm font-semibold text-[var(--color-text)] hover:bg-[var(--color-background)] focus:outline-none focus:ring-2 focus:ring-[var(--color-portal)] focus:ring-offset-2 focus:ring-offset-[var(--color-background)] transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
         )}
-        <button
-          type="button"
-          onClick={handleDecline}
-          disabled={isPending}
-          className="inline-flex justify-center items-center gap-2 rounded-xl border border-transparent bg-red-600 hover:bg-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-[var(--color-background)] transition-colors disabled:opacity-50"
-        >
-          {isPending && isDeclining ? (
-            "Processing..."
-          ) : (
-            <>
-              <XCircle className="w-4 h-4" />
-              Confirm Decline
-            </>
-          )}
-        </button>
-        {!isDeclining && (
+        {(currentStatus === 'pending' || currentStatus === 'approved') && (
+          <button
+            type="button"
+            onClick={handleDecline}
+            disabled={isPending}
+            className="inline-flex justify-center items-center gap-2 rounded-md border border-transparent bg-red-600 hover:bg-red-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-[var(--color-background)] transition-colors disabled:opacity-50"
+          >
+            {isPending && isDeclining ? (
+              "DECLINING..."
+            ) : (
+              <>
+                <XCircle className="w-4 h-4" />
+                {isDeclining ? "Decline Request" : "DECLINE"}
+              </>
+            )}
+          </button>
+        )}
+        {!isDeclining && (currentStatus === 'pending' || currentStatus === 'declined') && (
           <button
             type="button"
             onClick={handleApprove}
             disabled={isPending}
-            className="inline-flex justify-center items-center gap-2 rounded-xl border border-transparent bg-green-600 hover:bg-green-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-[var(--color-background)] transition-colors disabled:opacity-50"
+            className="inline-flex justify-center items-center gap-2 rounded-md border border-transparent bg-green-600 hover:bg-green-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-[var(--color-background)] transition-colors disabled:opacity-50"
           >
             {isPending && !isDeclining ? (
-              "Processing..."
+              "APPROVING..."
             ) : (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                Approve Request
+                APPROVE
               </>
             )}
           </button>

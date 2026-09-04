@@ -5,7 +5,7 @@ import { markNotificationAsRead, markAllNotificationsAsRead } from '@/app/action
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCheck, Bell, Clock, AlertCircle, CheckCircle2, XCircle, FileText } from 'lucide-react'
+import { CheckCheck, Bell, Clock, AlertCircle, FileText, ArrowRight, Check, X } from 'lucide-react'
 
 export type AppNotification = {
   id: string
@@ -43,16 +43,27 @@ export function NotificationList({ initialNotifications, role }: { initialNotifi
     return true
   })
 
-  const handleMarkAsRead = (id: string, gate_pass_id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
+  const handleMarkAsRead = (n: AppNotification) => {
+    setNotifications(prev => prev.map(notif => notif.id === n.id ? { ...notif, is_read: true } : notif))
     
     startTransition(async () => {
-      await markNotificationAsRead(id)
+      await markNotificationAsRead(n.id)
       router.refresh()
+      
+      const accountTypes = ['account_blocked', 'account_unblocked', 'account_approved', 'account_declined', 'account_under_review']
+      
       if (role === 'student') {
-        router.push(`/student/passes/${gate_pass_id}`)
+        if (accountTypes.includes(n.type)) {
+          router.push(`/student/notifications/${n.id}`)
+        } else {
+          router.push(`/student/passes/${n.gate_pass_id}`)
+        }
       } else {
-        router.push(`/tg/requests/${gate_pass_id}`)
+        if (n.type === 'new_student_request') {
+          router.push(`/tg/students`)
+        } else {
+          router.push(`/tg/requests/${n.gate_pass_id}`)
+        }
       }
     })
   }
@@ -69,13 +80,24 @@ export function NotificationList({ initialNotifications, role }: { initialNotifi
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'approved':
-        return <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+      case 'account_approved':
+        return (
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-[0_0_10px_rgba(52,211,153,0.3)] flex items-center justify-center shrink-0">
+            <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+          </div>
+        )
       case 'declined':
-        return <XCircle className="w-5 h-5 text-rose-500" />
+      case 'account_declined':
+        return (
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 shadow-[0_0_10px_rgba(244,63,94,0.3)] flex items-center justify-center shrink-0">
+            <X className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+          </div>
+        )
       case 'new_request':
-        return <FileText className="w-5 h-5 text-blue-500" />
+      case 'new_student_request':
+        return <div className="p-1 rounded-full"><FileText className="w-5 h-5 text-blue-500" /></div>
       default:
-        return <AlertCircle className="w-5 h-5 text-amber-500" />
+        return <div className="p-1 rounded-full"><AlertCircle className="w-5 h-5 text-amber-500" /></div>
     }
   }
 
@@ -154,12 +176,12 @@ export function NotificationList({ initialNotifications, role }: { initialNotifi
             {filteredNotifications.map((n) => (
               <li 
                 key={n.id} 
-                className={`p-4 hover:bg-[var(--color-portal-light)] transition-colors cursor-pointer flex items-start gap-3.5 ${
+                className={`group p-4 hover:bg-[var(--color-portal-light)] transition-colors cursor-pointer flex items-start gap-3.5 ${
                   !n.is_read ? 'bg-amber-500/5' : ''
                 }`}
-                onClick={() => handleMarkAsRead(n.id, n.gate_pass_id)}
+                onClick={() => handleMarkAsRead(n)}
               >
-                <div className="p-2 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] shrink-0 mt-0.5">
+                <div className="shrink-0 mt-0.5 border border-transparent">
                   {getNotificationIcon(n.type)}
                 </div>
 
@@ -178,9 +200,12 @@ export function NotificationList({ initialNotifications, role }: { initialNotifi
                   </p>
                 </div>
 
-                {!n.is_read && (
-                  <span className="w-2 h-2 rounded-full bg-[var(--color-portal)] shrink-0 mt-2" />
-                )}
+                <div className="flex flex-col items-end gap-2 shrink-0 mt-0.5">
+                  <ArrowRight className="w-4 h-4 text-[var(--color-secondary)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                  {!n.is_read && (
+                    <span className="w-2 h-2 rounded-full bg-[var(--color-portal)]" />
+                  )}
+                </div>
               </li>
             ))}
           </ul>

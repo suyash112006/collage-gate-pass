@@ -83,29 +83,11 @@ export default function TgSignupPage() {
     if (result.error) {
       setError(result.error)
     } else if (result.success) {
-      setSuccess(true)
+      router.push('/tg/login')
     }
   }
 
-  if (success) {
-    return (
-      <AuthLayout title="Registration Complete" subtitle="Mock UI state only">
-        <div className="text-center space-y-6">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4">
-            <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <p className="text-[var(--color-secondary)]">
-            Account creation form submitted successfully. (This is a frontend UI demonstration until backend integration.)
-          </p>
-          <Button onClick={() => router.push('/tg/login')} className="w-full">
-            Go to Login
-          </Button>
-        </div>
-      </AuthLayout>
-    )
-  }
+
 
   return (
     <AuthLayout title="TG Registration" subtitle="Register to manage your assigned students">

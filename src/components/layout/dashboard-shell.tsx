@@ -8,6 +8,7 @@ import { MobileNav } from "./mobile-nav"
 import { MobileDrawer } from "./mobile-drawer"
 import { DesktopHeader } from "./desktop-header"
 import { logout } from "@/app/actions/auth"
+import { StudentRealtimeSync } from "@/components/realtime/student-realtime-sync"
 
 interface DashboardShellProps {
   children: React.ReactNode
@@ -28,6 +29,8 @@ export function DashboardShell({ children, userRole, unreadCount, userName = "Us
 
   return (
     <div className={`min-h-screen bg-[var(--color-background)] ${portalClass}`}>
+      {userRole === "STUDENT" && <StudentRealtimeSync />}
+      
       {/* Desktop Sidebar */}
       <Sidebar
         userRole={userRole}

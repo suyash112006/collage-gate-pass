@@ -9,22 +9,35 @@ import { Select } from "@/components/ui/select"
 import { Eye, EyeOff } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-import { studentSignUp } from "@/app/actions/auth"
+import { studentSignUp, fetchAvailableTGs } from "@/app/actions/auth"
 
 export default function StudentSignupPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     name: "", studentId: "", roll: "", department: "",
     year: "", division: "", phone: "", email: "",
-    password: "", confirmPassword: ""
+    password: "", confirmPassword: "", tgId: ""
   })
   
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [tgs, setTgs] = useState<Array<{tg_id: string, full_name: string, department: string}>>([])
   
   const [errors, setErrors] = useState<Record<string, boolean>>({})
+
+  React.useEffect(() => {
+    async function loadTGs() {
+      const { data, error } = await fetchAvailableTGs()
+      if (data) {
+        setTgs(data)
+      } else if (error) {
+        console.error("Failed to load TGs:", error)
+      }
+    }
+    loadTGs()
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -86,6 +99,7 @@ export default function StudentSignupPage() {
     formDataObj.append('department', formData.department)
     formDataObj.append('year', formData.year)
     formDataObj.append('division', formData.division)
+    formDataObj.append('tgId', formData.tgId)
     
     const result = await studentSignUp(formDataObj)
     
@@ -94,29 +108,11 @@ export default function StudentSignupPage() {
     if (result.error) {
       setError(result.error)
     } else if (result.success) {
-      setSuccess(true)
+      router.push('/student/login')
     }
   }
 
-  if (success) {
-    return (
-      <AuthLayout title="Registration Complete" subtitle="Mock UI state only">
-        <div className="text-center space-y-6">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4">
-            <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <p className="text-[var(--color-secondary)]">
-            Account creation form submitted successfully. (This is a frontend UI demonstration until backend integration.)
-          </p>
-          <Button onClick={() => router.push('/student/login')} className="w-full">
-            Go to Login
-          </Button>
-        </div>
-      </AuthLayout>
-    )
-  }
+
 
   return (
     <AuthLayout title="Student Registration" subtitle="Create your student account to manage gate passes">
@@ -209,6 +205,18 @@ export default function StudentSignupPage() {
               }
             />
           </div>
+        </div>
+
+        <div className="pt-2">
+          <Label htmlFor="tgId" className={errors.tgId ? "text-[var(--color-declined)]" : ""}>Teacher Guardian</Label>
+          <Select id="tgId" name="tgId" value={formData.tgId} onChange={handleChange} error={errors.tgId} disabled={isLoading}>
+            <option value="">Select Teacher Guardian</option>
+            {tgs.map(tg => (
+              <option key={tg.tg_id} value={tg.tg_id}>
+                {tg.full_name} ({tg.department})
+              </option>
+            ))}
+          </Select>
         </div>
 
         <div className="pt-4">

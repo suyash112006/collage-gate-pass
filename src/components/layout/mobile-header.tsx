@@ -1,9 +1,8 @@
 "use client"
 
-import React from "react"
-import Link from "next/link"
-import { Bell, Menu, GraduationCap, Shield } from "lucide-react"
+import { Menu, GraduationCap, Shield } from "lucide-react"
 import { ThemeToggle } from "@/components/theme/theme-toggle"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 
 interface MobileHeaderProps {
   userRole: "STUDENT" | "TG"
@@ -13,7 +12,6 @@ interface MobileHeaderProps {
 
 export function MobileHeader({ userRole, unreadCount, onMenuOpen }: MobileHeaderProps) {
   const portalLabel = userRole === "STUDENT" ? "Student Portal" : "TG Portal"
-  const notificationHref = userRole === "STUDENT" ? "/student/notifications" : "/tg/notifications"
   const PortalIcon = userRole === "STUDENT" ? GraduationCap : Shield
 
   return (
@@ -39,18 +37,7 @@ export function MobileHeader({ userRole, unreadCount, onMenuOpen }: MobileHeader
         {/* Right: Theme Toggle + Notification bell */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link
-            href={notificationHref}
-            className="relative flex items-center justify-center w-9 h-9 rounded-lg text-[var(--color-secondary)] hover:bg-[var(--color-portal-light)] hover:text-[var(--color-portal)] transition-colors"
-            aria-label="View notifications"
-          >
-            <Bell className="w-5 h-5" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 inline-flex items-center justify-center min-w-[1rem] h-4 px-1 text-[0.625rem] font-bold text-white bg-red-500 rounded-full">
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
-            )}
-          </Link>
+          <NotificationBell initialUnreadCount={unreadCount} />
         </div>
       </div>
     </header>
