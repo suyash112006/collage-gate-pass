@@ -88,7 +88,13 @@ export async function createGatePass(formData: FormData) {
   })
 
   if (insertError) {
-    console.error('Gate pass creation error:', insertError)
+    console.error('[CreateGatePass] Failed:', {
+      message: insertError?.message,
+      code: insertError?.code,
+      details: insertError?.details,
+      hint: insertError?.hint,
+      payload: { student_id: studentData.id, reason, passDate, leavingTime, returnDate, expectedReturnTime },
+    })
     return { error: 'An unexpected error occurred while submitting your request. Please try again.' }
   }
 
