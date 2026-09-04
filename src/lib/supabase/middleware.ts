@@ -116,8 +116,19 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Redirect authenticated users away from login/signup pages
+  // Handle authenticated users visiting auth (login/signup) routes
   if (isAuthRoute && user) {
+    const isLoginRoute = pathname === '/student/login' || pathname === '/tg/login'
+    
+    if (isLoginRoute) {
+      // If a user visits a login page while authenticated (e.g., stale session from
+      // signup, or deliberately navigating to login), let them through. The login
+      // page will overwrite their session when they submit credentials.
+      // Do NOT redirect to /student/under-review or any status page.
+      return supabaseResponse
+    }
+
+    // For signup routes, redirect authenticated users to their dashboard
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -128,8 +139,7 @@ export async function updateSession(request: NextRequest) {
     
     if (profile?.role === 'tg') {
       url.pathname = '/tg/dashboard'
-    } else {
-      // For students, check status before redirecting
+    } else if (profile?.role === 'student') {
       const { data: student } = await supabase
         .from('students')
         .select('status')
@@ -141,6 +151,9 @@ export async function updateSession(request: NextRequest) {
       else if (status === 'BLOCKED') url.pathname = '/student/blocked'
       else if (status === 'DECLINED') url.pathname = '/student/declined'
       else url.pathname = '/student/dashboard'
+    } else {
+      // No profile found — let them through to signup
+      return supabaseResponse
     }
     
     return NextResponse.redirect(url)
