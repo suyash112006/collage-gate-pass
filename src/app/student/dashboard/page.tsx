@@ -96,28 +96,24 @@ export default async function StudentDashboardPage() {
         {/* 4 Stat Cards Grid — matching Reference Image 1 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
-            variant="total"
-            value={totalCount}
-            label="Total Passes"
-            description="All time"
+            variant="pending"
+            value={pendingCount}
+            label="Pending Requests"
           />
           <StatCard
             variant="approved"
             value={approvedCount}
-            label="Approved"
-            description="All time"
-          />
-          <StatCard
-            variant="pending"
-            value={pendingCount}
-            label="Pending"
-            description="Currently"
+            label="Approved (This Month)"
           />
           <StatCard
             variant="declined"
             value={declinedCount}
-            label="Declined"
-            description="All time"
+            label="Declined (This Month)"
+          />
+          <StatCard
+            variant="total"
+            value={totalCount}
+            label="Total Requests"
           />
         </div>
 

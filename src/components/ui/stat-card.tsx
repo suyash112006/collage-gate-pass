@@ -14,23 +14,23 @@ export interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export function StatCard({ variant, value, label, description, icon, className, ...props }: StatCardProps) {
   const variantStyles = {
     pending: {
-      bg: "bg-amber-100 dark:bg-amber-950/40",
-      text: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-50 dark:bg-amber-500/10",
+      text: "text-amber-500",
       defaultIcon: <Clock className="w-6 h-6" />,
     },
     approved: {
-      bg: "bg-emerald-100 dark:bg-emerald-950/40",
-      text: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-green-50 dark:bg-green-500/10",
+      text: "text-green-500",
       defaultIcon: <CheckCircle2 className="w-6 h-6" />,
     },
     declined: {
-      bg: "bg-rose-100 dark:bg-rose-950/40",
-      text: "text-rose-600 dark:text-rose-400",
+      bg: "bg-red-50 dark:bg-red-500/10",
+      text: "text-red-500",
       defaultIcon: <XCircle className="w-6 h-6" />,
     },
     total: {
-      bg: "bg-blue-100 dark:bg-blue-950/40",
-      text: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-50 dark:bg-blue-500/10",
+      text: "text-blue-500",
       defaultIcon: <FileText className="w-6 h-6" />,
     },
   }
@@ -38,15 +38,15 @@ export function StatCard({ variant, value, label, description, icon, className, 
   const style = variantStyles[variant]
 
   return (
-    <Card className={cn("p-4 flex items-center gap-4 hover:shadow-md transition-shadow", className)} {...props}>
+    <Card className={cn("p-5 flex items-center gap-4 hover:shadow-md transition-shadow border-[var(--color-border)] shadow-sm", className)} {...props}>
       <div className={cn("flex items-center justify-center w-12 h-12 rounded-xl shrink-0", style.bg, style.text)}>
         {icon || style.defaultIcon}
       </div>
-      <div className="min-w-0">
-        <p className="text-2xl font-bold text-[var(--color-text)] tracking-tight">{value}</p>
-        <p className="text-xs font-medium text-[var(--color-secondary)] truncate">{label}</p>
+      <div>
+        <p className="text-2xl font-bold text-[var(--color-text)] leading-none mb-1">{value}</p>
+        <p className="text-xs font-medium text-[var(--color-secondary)]">{label}</p>
         {description && (
-          <p className="text-[0.6875rem] text-[var(--color-secondary)] opacity-80 truncate">{description}</p>
+          <p className="text-[0.6875rem] text-[var(--color-muted)] truncate">{description}</p>
         )}
       </div>
     </Card>

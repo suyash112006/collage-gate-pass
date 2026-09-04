@@ -1,27 +1,59 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { GraduationCap, Shield, ArrowRight, Sparkles } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <main className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-8 text-center">
-        <div>
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Smart Gate Pass</h1>
-          <p className="text-gray-500">Welcome to the College Gate Pass Management System</p>
+    <div className="landing-page">
+      {/* Animated background orbs */}
+      <div className="landing-orb landing-orb-1" />
+      <div className="landing-orb landing-orb-2" />
+      <div className="landing-orb landing-orb-3" />
+
+      <main className="landing-card">
+        {/* Logo / Icon */}
+        <div className="landing-logo-wrapper">
+          <div className="landing-logo">
+            <Sparkles className="w-7 h-7" />
+          </div>
         </div>
 
-        <div className="space-y-4 pt-4">
-          <Link href="/student/login" className="block">
-            <Button className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700">
-              Student Login
-            </Button>
+        {/* Title */}
+        <h1 className="landing-title">
+          Smart Gate Pass
+        </h1>
+        <p className="landing-subtitle">
+          College Gate Pass Management System
+        </p>
+
+        {/* Buttons */}
+        <div className="landing-buttons">
+          <Link href="/student/login" className="landing-btn landing-btn-student" id="student-login-link">
+            <div className="landing-btn-icon">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div className="landing-btn-text">
+              <span className="landing-btn-label">Student Login</span>
+              <span className="landing-btn-desc">Access your gate passes</span>
+            </div>
+            <ArrowRight className="w-4 h-4 opacity-40 group-hover:opacity-100 transition-opacity ml-auto" />
           </Link>
-          <Link href="/tg/login" className="block">
-            <Button variant="outline" className="w-full h-12 text-lg border-gray-300 text-gray-700 hover:bg-gray-50">
-              Teacher Guardian Login
-            </Button>
+
+          <Link href="/tg/login" className="landing-btn landing-btn-tg" id="tg-login-link">
+            <div className="landing-btn-icon landing-btn-icon-tg">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div className="landing-btn-text">
+              <span className="landing-btn-label">Teacher Guardian</span>
+              <span className="landing-btn-desc">Manage student requests</span>
+            </div>
+            <ArrowRight className="w-4 h-4 opacity-40 group-hover:opacity-100 transition-opacity ml-auto" />
           </Link>
         </div>
+
+        {/* Footer */}
+        <p className="landing-footer">
+          Secure • Fast • Paperless
+        </p>
       </main>
     </div>
   );

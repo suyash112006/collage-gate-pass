@@ -53,12 +53,12 @@ export function Sidebar({ userRole, unreadCount, onLogout }: SidebarProps) {
   return (
     <aside className="hidden lg:flex lg:flex-col lg:w-60 lg:fixed lg:inset-y-0 bg-[var(--color-surface)] border-r border-[var(--color-border)] z-30 transition-colors duration-200">
       {/* Portal Branding */}
-      <div className="flex items-center justify-between px-4 h-[5.5rem] border-b border-[var(--color-border)] shrink-0">
+      <div className="flex items-center justify-between px-5 h-[5.5rem] border-b border-[var(--color-border)] shrink-0">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-[var(--color-portal)] text-white shadow-sm">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--color-portal)] to-[var(--color-portal-dark)] text-white shadow-sm">
             <PortalIcon className="w-5 h-5" />
           </div>
-          <span className="font-bold text-[var(--color-text)] text-base tracking-tight">{portalLabel}</span>
+          <span className="font-bold text-[var(--color-text)] text-[0.9375rem] tracking-tight">{portalLabel}</span>
         </div>
         <ThemeToggle />
       </div>

@@ -54,7 +54,7 @@ export function DesktopHeader({ userRole, unreadCount, userName, onLogout }: Des
         <div className="relative" ref={dropdownRef}>
           <button 
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-3 hover:bg-[var(--color-background)] py-1.5 px-2 pr-3 rounded-full border border-[var(--color-border)] transition-colors text-left shadow-sm"
+            className="flex items-center gap-3 hover:bg-[var(--color-background)] py-1.5 px-2 pr-3 rounded-full border border-[var(--color-border)] transition-all duration-200 text-left shadow-sm hover:shadow-md"
           >
             <Avatar name={userName} size="md" className="w-9 h-9" />
             <div className="hidden xl:block">

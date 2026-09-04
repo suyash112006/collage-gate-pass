@@ -181,7 +181,7 @@ export default function StudentSignupPage() {
             <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} error={errors.phone} disabled={isLoading} />
           </div>
           <div>
-            <Label htmlFor="email" className={errors.email ? "text-[var(--color-declined)]" : ""}>College Email</Label>
+            <Label htmlFor="email" className={errors.email ? "text-[var(--color-declined)]" : ""}>Student Email</Label>
             <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} error={errors.email} disabled={isLoading} />
           </div>
 

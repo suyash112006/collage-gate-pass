@@ -27,7 +27,8 @@ export function Avatar({ name, src, size = "md", className, ...props }: AvatarPr
   return (
     <div
       className={cn(
-        "relative flex items-center justify-center rounded-full bg-[var(--color-portal-light)] text-[var(--color-portal)] font-semibold border border-[var(--color-border)] overflow-hidden shrink-0 select-none",
+        "relative flex items-center justify-center rounded-full font-semibold border border-[var(--color-border)] overflow-hidden shrink-0 select-none",
+        initials ? "bg-gradient-to-br from-[var(--color-portal)] to-[var(--color-portal-dark)] text-white border-transparent" : "bg-[var(--color-portal-light)] text-[var(--color-portal)]",
         sizeClasses[size],
         className
       )}
