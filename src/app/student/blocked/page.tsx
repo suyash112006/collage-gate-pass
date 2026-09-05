@@ -3,11 +3,8 @@
 import React from "react"
 import { AuthLayout } from "@/components/layout/auth-layout"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
 
 export default function BlockedPage() {
-  const router = useRouter()
-
   return (
     <AuthLayout title="Account Blocked" subtitle="Access Denied">
       <div className="text-center space-y-6">

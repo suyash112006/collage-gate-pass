@@ -4,7 +4,6 @@ import React, { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Sidebar } from "./sidebar"
 import { MobileHeader } from "./mobile-header"
-import { MobileNav } from "./mobile-nav"
 import { MobileDrawer } from "./mobile-drawer"
 import { DesktopHeader } from "./desktop-header"
 import { logout } from "@/app/actions/auth"
@@ -63,17 +62,11 @@ export function DashboardShell({ children, userRole, unreadCount, userName = "Us
       />
 
       {/* Main Content */}
-      <main className="lg:pl-60 pt-14 lg:pt-[5.5rem] main-content-with-mobile-nav">
+      <main className="lg:pl-60 pt-14 lg:pt-[5.5rem]">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
           {children}
         </div>
       </main>
-
-      {/* Mobile Bottom Nav */}
-      <MobileNav
-        userRole={userRole}
-        unreadCount={unreadCount}
-      />
     </div>
   )
 }

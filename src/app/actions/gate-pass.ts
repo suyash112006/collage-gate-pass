@@ -517,20 +517,8 @@ export async function reviewGatePass(passId: string, status: 'approved' | 'decli
     notificationMessage += ` Remark: ${sanitizedRemark}`
   }
 
-  const adminClient = createAdminClient()
-  const { error: notifError } = await adminClient.from('notifications').insert({
-    user_id: actualStudent.user_id,
-    gate_pass_id: passId,
-    type: status,
-    title: notificationTitle,
-    message: notificationMessage
-  })
-
-  if (notifError) {
-    console.error('Failed to insert notification:', notifError)
-    return { error: 'Failed to create notification. Please contact administration.' }
-  }
-
+  // The database trigger 'protect_gate_pass_update' automatically inserts the notification
+  // into the 'notifications' table. We only need to trigger the web push here.
   // Phase 6B: Trigger Web Push for the Student post-transaction
   try {
     const { sendPushNotificationToUser } = await import('@/lib/push/send-push')

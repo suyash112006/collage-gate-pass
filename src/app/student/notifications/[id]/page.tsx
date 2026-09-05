@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { ArrowLeft, AlertTriangle, CheckCircle2, XCircle, UserCheck } from 'lucide-react'
 import Link from 'next/link'
 

@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-export async function login(formData: FormData) {
+export async function login(formData: FormData, expectedRole?: 'student' | 'tg') {
   const emailInput = formData.get('email') as string
   const password = formData.get('password') as string
 
@@ -40,8 +40,20 @@ export async function login(formData: FormData) {
     return { error: 'Authentication failed. No session created.' }
   }
 
-  // Also trace role lookup if we can, but we don't do role lookup here in this action.
-  // Role lookup happens in layout/middleware usually.
+  // Check role
+  if (expectedRole) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+      
+    if (profile && profile.role !== expectedRole) {
+      console.warn(`[AUTH_TRACE] Role mismatch: expected ${expectedRole}, got ${profile.role}`)
+      await supabase.auth.signOut()
+      return { roleMismatch: true, actualRole: profile.role }
+    }
+  }
 
   return { success: true }
 }

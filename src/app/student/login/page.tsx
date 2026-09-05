@@ -18,6 +18,7 @@ export default function StudentLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [roleMismatch, setRoleMismatch] = useState(false)
   
   const [emailError, setEmailError] = useState(false)
   const [passwordError, setPasswordError] = useState(false)
@@ -46,14 +47,52 @@ export default function StudentLoginPage() {
     formData.append('email', email)
     formData.append('password', password)
     
-    const result = await login(formData)
+    const result = await login(formData, 'student')
     
     if (result.error) {
       setIsLoading(false)
       setError(result.error)
+    } else if (result.roleMismatch) {
+      setIsLoading(false)
+      setRoleMismatch(true)
     } else if (result.success) {
       router.push('/student/dashboard')
     }
+  }
+
+  if (roleMismatch) {
+    return (
+      <AuthLayout title="Student Portal" subtitle="Sign in to your account to manage gate passes">
+        <div className="rounded-xl border border-border/50 bg-card p-6 text-center space-y-4">
+          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3 className="text-xl font-semibold text-[var(--color-text)]">Teacher Guardian Account</h3>
+          <p className="text-sm text-[var(--color-secondary)]">
+            This account belongs to a Teacher Guardian. Please use the Teacher Guardian Portal to continue.
+          </p>
+          <div className="pt-4">
+            <Button 
+              className="w-full" 
+              onClick={() => router.push('/tg/login')}
+            >
+              Go to Teacher Guardian Portal
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full mt-2" 
+              onClick={() => {
+                setRoleMismatch(false)
+                setEmail("")
+                setPassword("")
+              }}
+            >
+              Try another account
+            </Button>
+          </div>
+        </div>
+      </AuthLayout>
+    )
   }
 
   return (

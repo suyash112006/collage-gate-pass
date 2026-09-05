@@ -21,8 +21,6 @@ export default function TgSignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  
   const [errors, setErrors] = useState<Record<string, boolean>>({})
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -32,7 +30,6 @@ export default function TgSignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-    setSuccess(false)
     
     const newErrors: Record<string, boolean> = {}
     let hasError = false

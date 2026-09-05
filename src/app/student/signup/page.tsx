@@ -22,7 +22,6 @@ export default function StudentSignupPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
   const [tgs, setTgs] = useState<Array<{tg_id: string, full_name: string, department: string}>>([])
   
   const [errors, setErrors] = useState<Record<string, boolean>>({})
@@ -46,7 +45,6 @@ export default function StudentSignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-    setSuccess(false)
     
     const newErrors: Record<string, boolean> = {}
     let hasError = false

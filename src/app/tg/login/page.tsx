@@ -18,6 +18,7 @@ export default function TgLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [roleMismatch, setRoleMismatch] = useState(false)
   
   const [emailError, setEmailError] = useState(false)
   const [passwordError, setPasswordError] = useState(false)
@@ -46,14 +47,52 @@ export default function TgLoginPage() {
     formData.append('email', email)
     formData.append('password', password)
     
-    const result = await login(formData)
+    const result = await login(formData, 'tg')
     
     if (result.error) {
       setIsLoading(false)
       setError(result.error)
+    } else if (result.roleMismatch) {
+      setIsLoading(false)
+      setRoleMismatch(true)
     } else if (result.success) {
       router.push('/tg/dashboard')
     }
+  }
+
+  if (roleMismatch) {
+    return (
+      <AuthLayout title="Teacher Guardian" subtitle="Sign in to your account to review passes">
+        <div className="rounded-xl border border-border/50 bg-card p-6 text-center space-y-4">
+          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22h20"/><path d="M12 2v20"/><path d="m4 12 8-8 8 8"/><path d="M6 12v10"/><path d="M18 12v10"/></svg>
+          </div>
+          <h3 className="text-xl font-semibold text-[var(--color-text)]">Student Account</h3>
+          <p className="text-sm text-[var(--color-secondary)]">
+            This account belongs to a student. Please use the Student Portal to continue.
+          </p>
+          <div className="pt-4">
+            <Button 
+              className="w-full" 
+              onClick={() => router.push('/student/login')}
+            >
+              Go to Student Portal
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full mt-2" 
+              onClick={() => {
+                setRoleMismatch(false)
+                setEmail("")
+                setPassword("")
+              }}
+            >
+              Try another account
+            </Button>
+          </div>
+        </div>
+      </AuthLayout>
+    )
   }
 
   return (

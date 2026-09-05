@@ -70,7 +70,7 @@ export async function updateSession(request: NextRequest) {
 
     if (isStudentRoute && role !== 'student') {
       const url = request.nextUrl.clone()
-      url.pathname = role === 'tg' ? '/tg/dashboard' : '/student/login'
+      url.pathname = '/unauthorized'
       return NextResponse.redirect(url)
     }
 
@@ -111,7 +111,7 @@ export async function updateSession(request: NextRequest) {
 
     if (isTgRoute && role !== 'tg') {
       const url = request.nextUrl.clone()
-      url.pathname = role === 'student' ? '/student/dashboard' : '/tg/login'
+      url.pathname = '/unauthorized'
       return NextResponse.redirect(url)
     }
   }

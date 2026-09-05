@@ -43,7 +43,7 @@ export function StudentRealtimeSync() {
   // Step 3: subscribe to realtime events once we have the studentId
   useEffect(() => {
     if (!studentId) return;
-    let channel: any;
+    let channel: ReturnType<typeof publicSupabase.channel>;
     const setupSubscription = async () => {
       console.log('[StudentRealtime] setting up subscription for student', studentId);
       channel = publicSupabase
@@ -70,7 +70,7 @@ export function StudentRealtimeSync() {
               return;
             }
             console.log('[StudentRealtime] student status update', payload);
-            const newStatus = (payload.new as any).status as string;
+            const newStatus = (payload.new as { status?: string })?.status;
             const currentPath = window.location.pathname;
             if (newStatus === 'BLOCKED' && currentPath !== '/student/blocked') {
               console.log('[StudentRealtime] redirecting to /student/blocked');
